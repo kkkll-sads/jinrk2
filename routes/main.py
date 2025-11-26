@@ -802,8 +802,8 @@ def admin_update(conn=None):
         cursor = conn.cursor()
         
         if record_type == 'activation':
-            # 验证数据
-            if not all([record_data.get(field) for field in ['phone', 'name', 'id_number', 'card_number', 'card_type']]):
+            # 验证数据（管理员修改可不填身份证）
+            if not all([record_data.get(field) for field in ['phone', 'name', 'card_number', 'card_type']]):
                 return jsonify({'success': False, 'message': '请填写所有必要信息'}), 400
                 
             # 检查手机号是否已被其他记录使用
@@ -837,8 +837,8 @@ def admin_update(conn=None):
             ))
             
         elif record_type == 'address':
-            # 验证数据
-            if not all([record_data.get(field) for field in ['phone', 'name', 'id_number', 'delivery_phone', 'delivery_address', 'card_type']]):
+            # 验证数据（管理员修改可不填身份证）
+            if not all([record_data.get(field) for field in ['phone', 'name', 'delivery_phone', 'delivery_address', 'card_type']]):
                 return jsonify({'success': False, 'message': '请填写所有必要信息'}), 400
                 
             # 检查手机号是否已被其他记录使用

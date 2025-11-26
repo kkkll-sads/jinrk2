@@ -1133,7 +1133,7 @@ function submitEditActivation() {
     const cardType = document.getElementById('edit-activation-card-type').value;
     
     // 表单验证
-    if (!phone || !name || !idNumber || !cardNumber || !cardType) {
+    if (!phone || !name || !cardNumber || !cardType) {
         showError('请填写所有必填字段');
         return;
     }
@@ -1144,8 +1144,8 @@ function submitEditActivation() {
         return;
     }
     
-    // 验证身份证号格式
-    if (!/^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dX]$/.test(idNumber)) {
+    // 若填写身份证则校验格式
+    if (idNumber && !/^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dX]$/i.test(idNumber)) {
         showError('请输入有效的身份证号码');
         return;
     }
@@ -1243,7 +1243,7 @@ function submitEditAddress() {
     const shippingStatus = document.getElementById('edit-address-shipping-status').value;
     
     // 表单验证
-    if (!phone || !name || !idNumber || !deliveryPhone || !deliveryAddress || !cardType) {
+    if (!phone || !name || !deliveryPhone || !deliveryAddress || !cardType) {
         showError('请填写所有必填字段');
         return;
     }
@@ -1254,8 +1254,8 @@ function submitEditAddress() {
         return;
     }
     
-    // 验证身份证号格式
-    if (!/^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dX]$/.test(idNumber)) {
+    // 若填写身份证则校验格式
+    if (idNumber && !/^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dX]$/i.test(idNumber)) {
         showError('请输入有效的身份证号码');
         return;
     }
