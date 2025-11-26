@@ -1,0 +1,11 @@
+在Linux服务器上运行以下命令设置脚本执行权限：
+
+chmod +x start.sh
+chmod +x run_linux.sh  
+chmod +x install_linux.sh
+chmod +x start_with_nginx.sh
+chmod +x setup_nginx.sh
+
+或者一次性设置所有脚本权限：
+
+chmod +x *.sh 

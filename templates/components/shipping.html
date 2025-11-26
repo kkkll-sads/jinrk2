@@ -1,0 +1,333 @@
+<!-- 发货管理页面 -->
+<div id="shipping" class="section" style="display: none;">
+    <div class="section-card">
+        <div class="section-header">
+            <h2>发货管理</h2>
+            <div class="shipping-controls">
+                <!-- 添加单个账户查询 -->
+                <div class="search-box">
+                    <input type="text" id="shipping-search-input" placeholder="输入手机号码查询">
+                    <button class="search-btn" onclick="searchShipping()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <select id="shipping-status-filter">
+                    <option value="all">全部状态</option>
+                    <option value="pending">待发货</option>
+                    <option value="shipped">已发货</option>
+                    <option value="cancelled">已取消</option>
+                </select>
+                <button class="primary-btn" onclick="refreshShippingList()">
+                    <i class="fas fa-sync"></i>
+                    刷新列表
+                </button>
+                <button class="success-btn" onclick="batchUpdateShipping()">
+                    <i class="fas fa-truck"></i>
+                    批量更新
+                </button>
+            </div>
+        </div>
+
+        <!-- 添加批量修改选项 -->
+        <div class="batch-controls" style="margin: 15px 0;">
+            <label>批量操作:</label>
+            <select id="batch-status-select">
+                <option value="shipped">已发货</option>
+                <option value="pending">待发货</option>
+                <option value="cancelled">已取消</option>
+            </select>
+            <button class="primary-btn" onclick="batchUpdateShippingWithStatus()">
+                <i class="fas fa-save"></i>
+                执行批量修改
+            </button>
+            
+            <!-- 批量导入手机号 -->
+            <button class="secondary-btn" onclick="showModal('batch-phones-modal')">
+                <i class="fas fa-upload"></i>
+                批量导入手机号
+            </button>
+        </div>
+
+        <div class="shipping-list">
+            <table id="shipping-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="select-all-shipping" onchange="toggleAllShipping()">
+                        </th>
+                        <th>手机号码</th>
+                        <th>收件人</th>
+                        <th>收件地址</th>
+                        <th>金融卡等级</th>
+                        <th>发货状态</th>
+                        <th>快递单号</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="shipping-list-body">
+                    <!-- 列表将通过JavaScript动态添加 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <button class="page-btn" onclick="changePage(-1)">上一页</button>
+            <span id="page-info">第 1 页</span>
+            <button class="page-btn" onclick="changePage(1)">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- 批量手机号码模态框 -->
+<div id="batch-phones-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>批量处理手机号</h3>
+            <span class="close" onclick="hideModal('batch-phones-modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="batch-phones-textarea">输入手机号码 (每行一个):</label>
+                <textarea id="batch-phones-textarea" rows="10" placeholder="13800000000&#10;13900000000&#10;..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="batch-phones-status">设置发货状态:</label>
+                <select id="batch-phones-status">
+                    <option value="shipped">已发货</option>
+                    <option value="pending">待发货</option>
+                    <option value="cancelled">已取消</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button class="primary-btn" onclick="batchUpdateByPhones()">提交</button>
+                <button class="secondary-btn" onclick="hideModal('batch-phones-modal')">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑发货信息模态框 -->
+<div class="modal fade" id="edit-shipping-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">编辑发货信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-shipping-form">
+                    <div class="mb-3">
+                        <label class="form-label">手机号码</label>
+                        <input type="text" class="form-control" id="edit_shipping_phone" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">发货状态</label>
+                        <select class="form-select" id="edit_shipping_status">
+                            <option value="pending">待发货</option>
+                            <option value="shipped">已发货</option>
+                            <option value="cancelled">已取消</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">快递单号</label>
+                        <input type="text" class="form-control" id="edit_shipping_tracking" placeholder="请输入快递单号">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitEditShipping()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .shipping-controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .shipping-controls select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        min-width: 120px;
+    }
+
+    .success-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: var(--secondary-color);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .success-btn:hover {
+        background-color: #27ae60;
+    }
+
+    .shipping-list {
+        margin-top: 24px;
+        overflow-x: auto;
+    }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-shipped {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-top: 24px;
+    }
+
+    .page-btn {
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .page-btn:hover {
+        background-color: #f8f9fa;
+        border-color: #adb5bd;
+    }
+
+    #page-info {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .tracking-input {
+        width: 120px;
+        padding: 4px 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    
+    .search-box {
+        display: flex;
+        align-items: center;
+    }
+    
+    .search-box input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px 0 0 6px;
+        font-size: 14px;
+        width: 200px;
+    }
+    
+    .search-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 0 6px 6px 0;
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+    
+    .batch-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+    }
+</style>
+
+<script>
+// 渲染发货列表
+function renderShippingList(data) {
+    const tbody = document.getElementById('shipping-list-body');
+    tbody.innerHTML = '';
+    
+    data.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${item.phone}</td>
+            <td>${item.receiver_name}</td>
+            <td>${item.delivery_address}</td>
+            <td>${getStatusText(item.shipping_status)}</td>
+            <td>${item.tracking_number || '-'}</td>
+            <td>${item.shipping_time || '-'}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="openEditShippingModal('${item.phone}', '${item.shipping_status}', '${item.tracking_number || ''}')">
+                    编辑
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// 获取状态文本
+function getStatusText(status) {
+    const statusMap = {
+        'pending': '待发货',
+        'shipped': '已发货',
+        'cancelled': '已取消'
+    };
+    return statusMap[status] || status;
+}
+
+// 刷新发货列表
+function refreshShippingList() {
+    // 获取当前筛选条件
+    const status = document.getElementById('shipping-status-filter').value;
+    
+    fetch(`/admin_shipping_list?status=${status}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                renderShippingList(data.shipping_list);
+            } else {
+                showError(data.message || '获取发货列表失败');
+            }
+        })
+        .catch(error => {
+            console.error('获取发货列表错误:', error);
+            showError('获取发货列表失败');
+        });
+}
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+    refreshShippingList();
+    
+    // 状态筛选变化时刷新列表
+    document.getElementById('shipping-status-filter').addEventListener('change', refreshShippingList);
+});
+</script> 

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self';">
+    <title>金融卡激活登记</title>
+    {% include 'shared_styles.html' %}
+    <style>
+        /* 弹窗样式 */
+        .popup-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .popup-message.success {
+            border-top: 4px solid #2ecc71;
+        }
+
+        .popup-message.error {
+            border-top: 4px solid #e74c3c;
+        }
+
+        .popup-message .message-content {
+            margin: 10px 0 20px 0;
+            font-size: 16px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .popup-message .message-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .popup-message button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 80px;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .popup-message button:hover {
+            background-color: #2980b9;
+        }
+
+        .popup-message button:active {
+            transform: translateY(1px);
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .popup-message.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .popup-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 480px) {
+            .popup-message {
+                width: 85%;
+                padding: 15px;
+                font-size: 14px;
+            }
+
+            .popup-message .message-content {
+                font-size: 14px;
+                margin: 8px 0 15px 0;
+            }
+
+            .popup-message button {
+                padding: 6px 15px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 添加加载动画 -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+    <a href="{{ url_for('main.index') }}" class="nav-link">← 返回首页</a>
+    <h1>金融卡激活登记</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+    
+    <form id="activationForm" onsubmit="return submitActivationForm(event)">
+        <div class="form-group">
+            <label for="phone">手机号码：</label>
+            <input type="text" id="phone" name="phone" required 
+                   pattern="1[3-9]\d{9}" title="请输入有效的11位手机号码">
+        </div>
+        <div class="form-group">
+            <label for="name">姓名：</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="id_number">身份证号码：</label>
+            <input type="text" id="id_number" name="id_number" required 
+                   pattern="[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dX]"
+                   title="请输入有效的18位身份证号码">
+        </div>
+        <div class="form-group">
+            <label for="card_number">金融卡号码：</label>
+            <input type="text" id="card_number" name="card_number" required 
+                   pattern="\d{15,19}" title="请输入16-19位的卡号">
+        </div>
+        <div class="form-group">
+            <label for="card_type">卡片类型：</label>
+            <select id="card_type" name="card_type" required>
+                <option value="">请选择卡片类型</option>
+                <option value="platinum">铂金卡</option>
+                <option value="black">黑金卡</option>
+                <option value="supreme">至尊卡</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_front">身份证正面：</label>
+            <div class="file-input-container">
+                <label class="file-input-button">
+                    选择文件
+                    <input type="file" id="id_front" name="id_front_photo" required 
+                           accept="image/*" onchange="validateAndPreviewImage(this, 'preview_front', 5)">
+                </label>
+                <div id="preview_front" class="image-preview">
+                    <img class="preview-img" src="" alt="身份证正面预览">
+                    <span class="delete-preview" onclick="deletePreview('preview_front', 'id_front')">×</span>
+                </div>
+                <div class="error-message" id="error_front"></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="id_back">身份证反面：</label>
+            <div class="file-input-container">
+                <label class="file-input-button">
+                    选择文件
+                    <input type="file" id="id_back" name="id_back_photo" required 
+                           accept="image/*" onchange="validateAndPreviewImage(this, 'preview_back', 5)">
+                </label>
+                <div id="preview_back" class="image-preview">
+                    <img class="preview-img" src="" alt="身份证反面预览">
+                    <span class="delete-preview" onclick="deletePreview('preview_back', 'id_back')">×</span>
+                </div>
+                <div class="error-message" id="error_back"></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label></label>
+            <button type="submit">提交</button>
+        </div>
+    </form>
+
+    <!-- 添加弹窗元素 -->
+    <div class="popup-overlay" id="popupOverlay"></div>
+    <div class="popup-message" id="popupMessage">
+        <div class="message-content" id="popupContent"></div>
+        <div class="message-buttons">
+            <button class="primary" onclick="closePopup()">确定</button>
+        </div>
+    </div>
+
+    <script>
+    // 图片压缩函数
+    function compressImage(file, maxWidth, maxHeight, quality) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // 计算缩放比例
+                    if (width > maxWidth) {
+                        height = Math.round(height * maxWidth / width);
+                        width = maxWidth;
+                    }
+                    if (height > maxHeight) {
+                        width = Math.round(width * maxHeight / height);
+                        height = maxHeight;
+                    }
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 转换为Blob
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+        });
+    }
+
+    function validateAndPreviewImage(input, previewId, maxSizeMB) {
+        const file = input.files[0];
+        const maxSize = maxSizeMB * 1024 * 1024;
+        const errorId = 'error_' + previewId.split('_')[1];
+        const errorDiv = document.getElementById(errorId);
+        
+        // 清除之前的错误信息
+        errorDiv.textContent = '';
+        errorDiv.style.display = 'none';
+        
+        if (file) {
+            // 检查文件类型
+            if (!file.type.startsWith('image/')) {
+                showError(errorDiv, '请上传图片格式的文件（JPG、PNG等）');
+                input.value = '';
+                return;
+            }
+            
+            // 显示加载动画
+            document.getElementById('loading-overlay').style.display = 'flex';
+            
+            // 四级压缩策略，更强的压缩
+            compressImage(file, 1000, 1000, 0.6)
+                .then(blob => {
+                    if (blob.size > maxSize) {
+                        return compressImage(file, 800, 800, 0.4);
+                    }
+                    return blob;
+                })
+                .then(blob => {
+                    if (blob.size > maxSize) {
+                        return compressImage(file, 600, 600, 0.3);
+                    }
+                    return blob;
+                })
+                .then(blob => {
+                    if (blob.size > maxSize) {
+                        return compressImage(file, 400, 400, 0.2);
+                    }
+                    return blob;
+                })
+                .then(blob => {
+                    if (blob.size > maxSize) {
+                        showError(errorDiv, `图片大小不能超过${maxSizeMB}MB，当前大小：${(blob.size / (1024 * 1024)).toFixed(2)}MB，请尝试使用更小的图片`);
+                        input.value = '';
+                        document.getElementById('loading-overlay').style.display = 'none';
+                        return;
+                    }
+                    
+                    // 创建新的File对象
+                    const compressedFile = new File([blob], file.name, {
+                        type: 'image/jpeg',
+                        lastModified: new Date().getTime()
+                    });
+                    
+                    // 替换原始文件
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(compressedFile);
+                    input.files = dataTransfer.files;
+                    
+                    // 预览压缩后的图片
+                    const preview = document.getElementById(previewId);
+                    const img = preview.querySelector('img');
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        img.src = e.target.result;
+                        preview.style.display = 'block';
+                        document.getElementById('loading-overlay').style.display = 'none';
+                        
+                        // 显示压缩信息
+                        const originalSize = (file.size / (1024 * 1024)).toFixed(2);
+                        const compressedSize = (blob.size / (1024 * 1024)).toFixed(2);
+                        const compressionRatio = ((1 - blob.size / file.size) * 100).toFixed(1);
+                        showError(errorDiv, `压缩成功：${originalSize}MB → ${compressedSize}MB (节省${compressionRatio}%)`);
+                        errorDiv.style.color = '#4CAF50';  // 使用绿色显示成功信息
+                    };
+                    
+                    reader.readAsDataURL(compressedFile);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError(errorDiv, '图片处理失败，请重试');
+                    input.value = '';
+                    document.getElementById('loading-overlay').style.display = 'none';
+                });
+        }
+    }
+    
+    function showError(errorDiv, message) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        errorDiv.className = 'error-message error-show';
+    }
+    
+    function deletePreview(previewId, inputId) {
+        const preview = document.getElementById(previewId);
+        const input = document.getElementById(inputId);
+        const img = preview.querySelector('img');
+        const errorId = 'error_' + previewId.split('_')[1];
+        const errorDiv = document.getElementById(errorId);
+        
+        img.src = '';
+        preview.style.display = 'none';
+        input.value = '';
+        errorDiv.textContent = '';
+        errorDiv.style.display = 'none';
+    }
+
+    // 添加弹窗相关函数
+    function showPopup(message, type = 'error') {
+        const popup = document.getElementById('popupMessage');
+        const overlay = document.getElementById('popupOverlay');
+        const content = document.getElementById('popupContent');
+        
+        content.textContent = message;
+        popup.className = `popup-message ${type} show`;
+        overlay.className = 'popup-overlay show';
+        
+        // 如果是成功消息，3秒后自动关闭
+        if (type === 'success') {
+            setTimeout(() => {
+                closePopup();
+                if (message.includes('成功')) {
+                    window.location.href = '/';
+                }
+            }, 3000);
+        }
+    }
+
+    function closePopup() {
+        const popup = document.getElementById('popupMessage');
+        const overlay = document.getElementById('popupOverlay');
+        popup.className = 'popup-message';
+        overlay.className = 'popup-overlay';
+    }
+
+    // 修改原有的showGlobalError函数，改用弹窗显示
+    function showGlobalError(message, type = 'error') {
+        showPopup(message, type);
+    }
+
+    // 修改原有的showMessage函数，改用弹窗显示
+    function showMessage(message, isSuccess) {
+        showPopup(message, isSuccess ? 'success' : 'error');
+        
+        if (isSuccess) {
+            // 重置表单
+            document.getElementById('activationForm').reset();
+            // 清除图片预览
+            deletePreview('preview_front', 'id_front');
+            deletePreview('preview_back', 'id_back');
+            // 恢复卡片类型选择的启用状态
+            document.getElementById('card_type').disabled = false;
+        }
+    }
+
+    // 验证账户等级并设置卡片类型
+    async function validateAccountLevel() {
+        const phone = document.getElementById('phone').value.trim();
+        if (!phone) {
+            showGlobalError('请输入手机号码');
+            return false;
+        }
+
+        if (!phone.match(/^1[3-9]\d{9}$/)) {
+            showGlobalError('请输入有效的手机号码');
+            return false;
+        }
+
+        document.getElementById('loading-overlay').style.display = 'flex';
+        
+        try {
+            // 发送请求验证账户等级
+            const response = await fetch('/validate_account_level', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ phone: phone })
+            });
+            const data = await response.json();
+            
+            document.getElementById('loading-overlay').style.display = 'none';
+            
+            if (data.success) {
+                // 设置卡片类型选择框的值
+                const cardTypeSelect = document.getElementById('card_type');
+                cardTypeSelect.value = data.card_level;
+                cardTypeSelect.disabled = true; // 禁用选择框，只能选择对应等级
+                
+                // 保存手机号码到本地存储
+                localStorage.setItem('lastValidatedPhone', phone);
+                
+                showGlobalError('已匹配到账户，卡片类型为' + data.card_level_name, 'success');
+                return true;
+            } else {
+                showGlobalError('该账户未购买金融卡，请先购买金融卡');
+                return false;
+            }
+        } catch (error) {
+            document.getElementById('loading-overlay').style.display = 'none';
+            console.error('验证账户错误:', error);
+            showGlobalError('该账户未购买金融卡，请先购买金融卡');
+            return false;
+        }
+    }
+
+    // 手机号输入框失去焦点时验证账户等级
+    document.getElementById('phone').addEventListener('blur', validateAccountLevel);
+
+    // 页面加载时检查是否有上次验证的手机号码
+    document.addEventListener('DOMContentLoaded', function() {
+        const lastPhone = localStorage.getItem('lastValidatedPhone');
+        if (lastPhone) {
+            const phoneInput = document.getElementById('phone');
+            phoneInput.value = lastPhone;
+            // 自动触发验证
+            validateAccountLevel();
+        }
+    });
+
+    // 表单提交处理
+    async function submitActivationForm(event) {
+        event.preventDefault();
+        console.log("开始提交表单...");
+        
+        // 先验证账户等级
+        const isValid = await validateAccountLevel();
+        if (!isValid) {
+            console.log("账户验证未通过");
+            return false;
+        }
+        
+        // 获取基本表单数据
+        const phone = document.getElementById('phone').value.trim();
+        const name = document.getElementById('name').value.trim();
+        const idNumber = document.getElementById('id_number').value.trim();
+        const cardNumber = document.getElementById('card_number').value.trim();
+        const cardType = document.getElementById('card_type').value;
+        
+        console.log("表单数据:", { phone, name, idNumber, cardNumber, cardType });
+        
+        // 检查必填字段
+        if (!phone || !name || !idNumber || !cardNumber || !cardType) {
+            showGlobalError("请填写所有必要信息");
+            console.log("基本表单字段未填写完整");
+            return false;
+        }
+        
+        // 检查文件上传
+        const frontFile = document.getElementById('id_front').files[0];
+        const backFile = document.getElementById('id_back').files[0];
+        const errorFront = document.getElementById('error_front');
+        const errorBack = document.getElementById('error_back');
+        let hasError = false;
+        
+        console.log("文件上传状态:", { 
+            frontFile: frontFile ? frontFile.name : '未选择', 
+            backFile: backFile ? backFile.name : '未选择' 
+        });
+        
+        // 清除所有错误信息
+        errorFront.textContent = '';
+        errorBack.textContent = '';
+        errorFront.style.display = 'none';
+        errorBack.style.display = 'none';
+        
+        if (!frontFile) {
+            showError(errorFront, '请上传身份证正面照片');
+            showGlobalError('请上传身份证正面照片');
+            hasError = true;
+        }
+        
+        if (!backFile) {
+            showError(errorBack, '请上传身份证反面照片');
+            showGlobalError('请上传身份证反面照片');
+            hasError = true;
+        }
+        
+        if (hasError) {
+            console.log("文件上传验证未通过");
+            return false;
+        }
+        
+        // 显示加载动画
+        document.getElementById('loading-overlay').style.display = 'flex';
+        
+        try {
+            // 使用 FormData 提交表单
+            const formData = new FormData();
+            
+            // 手动添加表单字段，确保数据正确传递
+            formData.append('phone', phone);
+            formData.append('name', name);
+            formData.append('id_number', idNumber);
+            formData.append('card_number', cardNumber);
+            formData.append('card_type', cardType);
+            formData.append('id_front_photo', frontFile);
+            formData.append('id_back_photo', backFile);
+            
+            console.log("准备发送表单数据...");
+            
+            const response = await fetch("{{ url_for('main.submit_activation') }}", {
+                method: 'POST',
+                body: formData
+            });
+            
+            console.log("服务器响应状态:", response.status);
+            const data = await response.json();
+            console.log("服务器响应数据:", data);
+            
+            document.getElementById('loading-overlay').style.display = 'none';
+            
+            if (data.成功) {
+                // 清除存储的手机号码
+                localStorage.removeItem('lastValidatedPhone');
+                showMessage(data.消息, true);
+                showGlobalError(data.消息, 'success');
+            } else {
+                showMessage(data.消息 || '激活登记失败，请检查填写信息', false);
+                showGlobalError(data.消息 || '激活登记失败，请检查填写信息');
+            }
+        } catch (error) {
+            console.error('提交表单错误:', error);
+            document.getElementById('loading-overlay').style.display = 'none';
+            showMessage('提交失败，请稍后重试', false);
+            showGlobalError('提交失败，请稍后重试');
+        }
+        
+        return false;
+    }
+
+    // 处理后端返回的错误信息
+    document.addEventListener('DOMContentLoaded', function() {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(function(message) {
+            if (message.classList.contains('flash-error')) {
+                message.style.backgroundColor = '#ffebee';
+                message.style.color = '#c62828';
+                message.style.padding = '10px';
+                message.style.marginBottom = '10px';
+                message.style.borderRadius = '4px';
+                message.style.border = '1px solid #ef9a9a';
+            }
+        });
+    });
+    </script>
+
+    <style>
+    .error-message {
+        display: none;
+        color: #c62828;
+        font-size: 0.9em;
+        margin-top: 5px;
+        padding: 8px;
+        background-color: #ffebee;
+        border: 1px solid #ef9a9a;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .error-show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .flash-messages {
+        margin-bottom: 20px;
+    }
+
+    .flash-error {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+
+    .message-box {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .message-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 80%;
+        width: 400px;
+    }
+
+    .message-content button {
+        margin-top: 15px;
+        padding: 8px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .message-content button:hover {
+        background-color: #45a049;
+    }
+    </style>
+</body>
+</html> 

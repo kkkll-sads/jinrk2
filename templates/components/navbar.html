@@ -1,0 +1,68 @@
+<!-- 导航栏组件 -->
+<div class="sidebar">
+    <div class="nav-item active" onclick="showSection('dashboard', event)">
+        <i class="fas fa-chart-line"></i>
+        <span>仪表盘</span>
+    </div>
+    <div class="nav-item" onclick="showSection('search', event)">
+        <i class="fas fa-search"></i>
+        <span>查询管理</span>
+    </div>
+    <div class="nav-item" onclick="showSection('shipping', event)">
+        <i class="fas fa-truck"></i>
+        <span>发货管理</span>
+    </div>
+    <div class="nav-item" onclick="showSection('account', event)">
+        <i class="fas fa-users"></i>
+        <span>账户管理</span>
+    </div>
+    <div class="nav-item" onclick="showSection('card', event)">
+        <i class="fas fa-credit-card"></i>
+        <span>金融卡管理</span>
+    </div>
+    <div class="nav-item" onclick="showSection('import', event)">
+        <i class="fas fa-file-import"></i>
+        <span>数据导入</span>
+    </div>
+    <div class="nav-item" onclick="showSection('export', event)">
+        <i class="fas fa-file-export"></i>
+        <span>数据导出</span>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        width: 220px;
+        background-color: #2c3e50;
+        color: white;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .nav-item {
+        padding: 15px 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: #ecf0f1;
+        text-decoration: none;
+        display: block;
+        border-left: 4px solid transparent;
+    }
+
+    .nav-item:hover {
+        background-color: #34495e;
+        border-left-color: #3498db;
+    }
+
+    .nav-item.active {
+        background-color: #34495e;
+        border-left-color: #3498db;
+        font-weight: bold;
+    }
+
+    .nav-item i {
+        margin-right: 10px;
+    }
+</style> 

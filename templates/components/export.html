@@ -1,0 +1,263 @@
+<!-- 数据导出页面 -->
+<div id="export" class="section" style="display: none;">
+    <div class="section-card">
+        <div class="section-header">
+            <h2>数据导出</h2>
+        </div>
+
+        <div class="export-options">
+            <!-- 地址登记数据导出 -->
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>地址登记数据导出</h3>
+                </div>
+                <div class="export-body">
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="export-card-level-check" class="filter-checkbox">
+                            <div class="filter-group">
+                                <label>金融卡等级：</label>
+                                <select id="export-card-level" disabled>
+                                    <option value="platinum">铂金卡</option>
+                                    <option value="black">黑金卡</option>
+                                    <option value="supreme">至尊卡</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-option">
+                            <input type="checkbox" id="export-shipping-status-check" class="filter-checkbox">
+                            <div class="filter-group">
+                                <label>发货状态：</label>
+                                <select id="export-shipping-status" disabled>
+                                    <option value="pending">待发货</option>
+                                    <option value="shipped">已发货</option>
+                                    <option value="cancelled">已取消</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-option">
+                            <input type="checkbox" id="export-limit-check" class="filter-checkbox">
+                            <div class="filter-group">
+                                <label>限制数量：</label>
+                                <input type="number" id="export-limit-count" value="1000" min="1" max="10000" disabled>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-option">
+                            <input type="checkbox" id="export-date-check" class="filter-checkbox">
+                            <div class="filter-group">
+                                <label>时间范围：</label>
+                                <div class="date-range">
+                                    <input type="date" id="export-date-start" disabled>
+                                    <span>至</span>
+                                    <input type="date" id="export-date-end" disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="export-btn" onclick="exportAddressData()">
+                        <i class="fas fa-file-export"></i>
+                        导出地址登记数据
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导出历史记录 -->
+        <div class="export-history">
+            <h3>导出历史</h3>
+            <table id="export-history-table">
+                <thead>
+                    <tr>
+                        <th>导出时间</th>
+                        <th>数据类型</th>
+                        <th>筛选条件</th>
+                        <th>记录数</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="export-history-body">
+                    <!-- 导出历史记录通过JS动态加载 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .export-options {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .export-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .export-header {
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
+        background-color: var(--primary-color);
+        color: white;
+        gap: 12px;
+    }
+
+    .export-header i {
+        font-size: 24px;
+    }
+
+    .export-header h3 {
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .export-body {
+        padding: 24px;
+    }
+
+    .filter-options {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .filter-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .filter-checkbox {
+        margin-top: 10px;
+    }
+
+    .filter-group {
+        flex: 1;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-color);
+    }
+
+    .filter-group select,
+    .filter-group input[type="number"] {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .date-range {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .date-range input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .export-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 24px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%;
+    }
+
+    .export-btn:hover {
+        background-color: #2980b9;
+    }
+
+    .export-history {
+        margin-top: 32px;
+    }
+
+    .export-history h3 {
+        margin-bottom: 16px;
+        color: var(--text-color);
+    }
+
+    #export-history-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #export-history-table th,
+    #export-history-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    #export-history-table th {
+        background-color: #f8f9fa;
+        font-weight: 500;
+        color: #666;
+    }
+
+    .download-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 12px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .download-btn:hover {
+        background-color: #2980b9;
+    }
+</style>
+
+<script>
+    // 切换过滤条件启用状态
+    document.querySelectorAll('.filter-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const filterGroupId = this.id.replace('-check', '');
+            const filterElement = document.getElementById(filterGroupId);
+            
+            if (filterElement) {
+                filterElement.disabled = !this.checked;
+            } else {
+                // 处理日期范围
+                const startDate = document.getElementById(`${filterGroupId}-start`);
+                const endDate = document.getElementById(`${filterGroupId}-end`);
+                if (startDate) startDate.disabled = !this.checked;
+                if (endDate) endDate.disabled = !this.checked;
+            }
+        });
+    });
+</script> 

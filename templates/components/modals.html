@@ -1,0 +1,125 @@
+<!-- 模态框组件 -->
+<!-- 添加账户模态框 -->
+<div id="add_account_modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>添加账户</h3>
+            <span class="close" onclick="hideModal('add_account_modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="add_account_phone">手机号码：</label>
+                <input type="text" id="add_account_phone" maxlength="11" required>
+            </div>
+            <div class="form-group">
+                <label for="add_account_card_level">金融卡等级：</label>
+                <select id="add_account_card_level" required>
+                    <option value="platinum">铂金卡</option>
+                    <option value="black">黑金卡</option>
+                    <option value="supreme">至尊卡</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="submitAddAccount()" class="primary-btn">确认添加</button>
+            <button onclick="hideModal('add_account_modal')" class="secondary-btn">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- 批量添加账户模态框 -->
+<div id="batch_add_accounts_modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>批量添加账户</h3>
+            <span class="close" onclick="hideModal('batch_add_accounts_modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>默认金融卡等级：</label>
+                <select id="batch_add_accounts_card_level" required>
+                    <option value="platinum">铂金卡</option>
+                    <option value="black">黑金卡</option>
+                    <option value="supreme">至尊卡</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>手机号码列表：</label>
+                <textarea id="batch_add_accounts_phones" rows="5" placeholder="每行一个手机号码"></textarea>
+                <div class="help-text">示例：<br>13800138000<br>13900139000</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="submitBatchAddAccounts()" class="primary-btn">确认添加</button>
+            <button onclick="hideModal('batch_add_accounts_modal')" class="secondary-btn">取消</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 模态框样式 */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        color: #333;
+    }
+
+    .modal-body {
+        margin-bottom: 20px;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+
+    .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover {
+        color: #555;
+    }
+
+    .help-text {
+        margin-top: 5px;
+        font-size: 12px;
+        color: #666;
+    }
+</style> 

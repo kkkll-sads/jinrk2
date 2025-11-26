@@ -1,0 +1,172 @@
+<!-- 账户管理页面 -->
+<div id="account" class="section" style="display: none;">
+    <div class="section-card">
+        <div class="section-header">
+            <h2>账户管理</h2>
+            <div class="account-controls">
+                <button class="primary-btn" onclick="showModal('add_account_modal')">
+                    <i class="fas fa-user-plus"></i>
+                    添加账户
+                </button>
+                <button class="secondary-btn" onclick="showModal('batch_add_accounts_modal')">
+                    <i class="fas fa-users"></i>
+                    批量添加
+                </button>
+                <button class="primary-btn" onclick="refreshAccountList()">
+                    <i class="fas fa-sync"></i>
+                    刷新列表
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>金融卡等级：</label>
+                <select id="account-level-filter">
+                    <option value="all">全部等级</option>
+                    <option value="platinum">铂金卡</option>
+                    <option value="black">黑金卡</option>
+                    <option value="supreme">至尊卡</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>激活状态：</label>
+                <select id="activation-status-filter">
+                    <option value="all">全部状态</option>
+                    <option value="activated">已激活</option>
+                    <option value="not_activated">未激活</option>
+                </select>
+            </div>
+            <div class="search-group">
+                <input type="text" id="account-search" placeholder="搜索手机号码">
+                <button class="search-btn" onclick="searchAccounts()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="account-list">
+            <table id="account-table">
+                <thead>
+                    <tr>
+                        <th>手机号码</th>
+                        <th>金融卡等级</th>
+                        <th>激活状态</th>
+                        <th>注册时间</th>
+                        <th>最后更新</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="account-list-body">
+                    <!-- 列表将通过JavaScript动态添加 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <button class="page-btn" onclick="changeAccountPage(-1)">上一页</button>
+            <span id="account-page-info">第 1 页</span>
+            <button class="page-btn" onclick="changeAccountPage(1)">下一页</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .account-controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .secondary-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .secondary-btn:hover {
+        background-color: #5a6268;
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 24px;
+        margin-top: 24px;
+        padding: 16px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-group label {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .filter-group select {
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        min-width: 120px;
+    }
+
+    .search-group {
+        display: flex;
+        gap: 8px;
+        margin-left: auto;
+    }
+
+    .search-group input {
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        width: 200px;
+    }
+
+    .search-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 4px;
+        background-color: var(--primary-color);
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .search-btn:hover {
+        background-color: #2980b9;
+    }
+
+    .account-list {
+        margin-top: 24px;
+        overflow-x: auto;
+    }
+
+    .status-activated {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-not-activated {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style> 

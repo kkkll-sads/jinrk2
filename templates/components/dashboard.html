@@ -1,0 +1,250 @@
+<!-- 仪表盘组件 -->
+<div id="dashboard" class="section">
+    <div class="dashboard-section">
+        <div class="dashboard-header">
+            <h2>数据概览</h2>
+            <button id="refresh-button" class="refresh-btn" onclick="refreshDashboard()">
+                <i class="fas fa-sync"></i>
+                <span>刷新数据</span>
+            </button>
+        </div>
+        
+        <div class="dashboard-grid">
+            <!-- 激活登记统计 -->
+            <div class="dashboard-card">
+                <h3>激活登记统计</h3>
+                <div class="stat-group">
+                    <div class="stat">
+                        <span class="stat-label">总激活数</span>
+                        <span class="stat-value" id="total-activations">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">今日激活</span>
+                        <span class="stat-value" id="today-activations">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 地址登记统计 -->
+            <div class="dashboard-card">
+                <h3>地址登记统计</h3>
+                <div class="stat-group">
+                    <div class="stat">
+                        <span class="stat-label">总登记数</span>
+                        <span class="stat-value" id="total-addresses">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">今日登记</span>
+                        <span class="stat-value" id="today-addresses">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 发货状态统计 -->
+            <div class="dashboard-card">
+                <h3>发货状态统计</h3>
+                <div class="stat-bars" id="shipping-stats">
+                    <div class="stat-bar-group">
+                        <label>已发货</label>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="stat-value">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-bar-group">
+                        <label>待发货</label>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="stat-value">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-bar-group">
+                        <label>已取消</label>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="stat-value">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 金融卡类型分布 -->
+            <div class="dashboard-card">
+                <h3>金融卡类型分布</h3>
+                <div class="stat-bars" id="card-type-stats">
+                    <div class="stat-bar-group">
+                        <label>铂金卡</label>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="stat-value">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-bar-group">
+                        <label>黑金卡</label>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="stat-value">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-bar-group">
+                        <label>至尊卡</label>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="stat-value">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 仪表盘样式 */
+    .dashboard-section {
+        padding: 25px;
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin-bottom: 30px;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .dashboard-header h2 {
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--text-color);
+        margin: 0;
+    }
+
+    .refresh-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+
+    .refresh-btn:hover {
+        background-color: #2980b9;
+        transform: translateY(-1px);
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+    }
+
+    .dashboard-card {
+        background-color: var(--card-bg);
+        padding: 25px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-card h3 {
+        margin: 0 0 20px 0;
+        color: var(--text-color);
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    /* 统计数据样式 */
+    .stat-group {
+        display: flex;
+        justify-content: space-around;
+        gap: 20px;
+    }
+
+    .stat {
+        text-align: center;
+        flex: 1;
+    }
+
+    .stat-label {
+        display: block;
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 28px;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    /* 进度条样式 */
+    .stat-bars {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .stat-bar-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .stat-bar-group label {
+        width: 80px;
+        font-size: 14px;
+        color: #666;
+        text-align: right;
+    }
+
+    .stat-bar-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .stat-bar {
+        flex: 1;
+        height: 8px;
+        background-color: #edf2f7;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: var(--primary-color);
+        border-radius: 4px;
+        transition: width 0.6s ease;
+    }
+</style> 

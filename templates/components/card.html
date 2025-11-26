@@ -1,0 +1,144 @@
+<!-- 金融卡管理页面 -->
+<div id="card" class="section" style="display: none;">
+    <div class="section-card">
+        <div class="section-header">
+            <h2>金融卡管理</h2>
+            <div class="card-controls">
+                <button class="primary-btn" onclick="showModal('add_card_modal')">
+                    <i class="fas fa-credit-card"></i>
+                    添加金融卡
+                </button>
+                <button class="primary-btn" onclick="refreshCardList()">
+                    <i class="fas fa-sync"></i>
+                    刷新列表
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>使用状态：</label>
+                <select id="card-status-filter">
+                    <option value="all">全部状态</option>
+                    <option value="available">可用</option>
+                    <option value="used">已使用</option>
+                    <option value="locked">已锁定</option>
+                </select>
+            </div>
+            <div class="search-group">
+                <input type="text" id="card-search" placeholder="搜索卡号">
+                <button class="search-btn" onclick="searchCards()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="card-list">
+            <table id="card-table">
+                <thead>
+                    <tr>
+                        <th>卡号</th>
+                        <th>使用状态</th>
+                        <th>绑定手机</th>
+                        <th>激活时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="card-list-body">
+                    <!-- 列表将通过JavaScript动态添加 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <button class="page-btn" onclick="changeCardPage(-1)">上一页</button>
+            <span id="card-page-info">第 1 页</span>
+            <button class="page-btn" onclick="changeCardPage(1)">下一页</button>
+        </div>
+    </div>
+</div>
+
+<!-- 添加金融卡模态框 -->
+<div id="add_card_modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>添加金融卡</h3>
+            <span class="close" onclick="hideModal('add_card_modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="add_card_number">卡号：</label>
+                <input type="text" id="add_card_number" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="submitAddCard()" class="primary-btn">确认添加</button>
+            <button onclick="hideModal('add_card_modal')" class="secondary-btn">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑金融卡模态框 -->
+<div id="edit_card_modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>编辑金融卡</h3>
+            <span class="close" onclick="hideModal('edit_card_modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="edit_card_number">卡号：</label>
+                <input type="text" id="edit_card_number" readonly>
+            </div>
+            <div class="form-group">
+                <label for="edit_card_status">使用状态：</label>
+                <select id="edit_card_status">
+                    <option value="available">可用</option>
+                    <option value="used">已使用</option>
+                    <option value="locked">已锁定</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="submitEditCard()" class="primary-btn">保存修改</button>
+            <button onclick="hideModal('edit_card_modal')" class="secondary-btn">取消</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .card-list {
+        margin-top: 24px;
+        overflow-x: auto;
+    }
+
+    .status-available {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+
+    .status-used {
+        background-color: #cce5ff;
+        color: #004085;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+
+    .status-locked {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+</style> 
