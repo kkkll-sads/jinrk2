@@ -1144,11 +1144,7 @@ function submitEditActivation() {
         return;
     }
     
-    // 若填写身份证则校验格式
-    if (idNumber && !/^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dX]$/i.test(idNumber)) {
-        showError('请输入有效的身份证号码');
-        return;
-    }
+    // 后台修改时不限制身份证格式
     
     // 发送请求
     fetch('/admin_update', {
@@ -1254,11 +1250,7 @@ function submitEditAddress() {
         return;
     }
     
-    // 若填写身份证则校验格式
-    if (idNumber && !/^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dX]$/i.test(idNumber)) {
-        showError('请输入有效的身份证号码');
-        return;
-    }
+    // 后台修改时不限制身份证格式
     
     // 验证收货电话格式
     if (!/^1[3-9]\d{9}$/.test(deliveryPhone)) {
